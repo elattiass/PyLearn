@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyLearn | Learning Path</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/app.js" defer></script>
+    <script src="js/path.js" defer></script>
+</head>
+<body class="page-path">
+    <header class="site-header">
+        <div class="container header-content">
+            <a class="brand" href="index.html">
+                <span class="brand-mark">P</span>
+                <span class="brand-text">PyLearn</span>
+            </a>
+
+            <nav class="site-nav" aria-label="Main navigation">
+                <ul class="nav-list">
+                    <li><a class="nav-link" href="index.html">Home</a></li>
+                    <li><a class="nav-link" href="login.html">Login</a></li>
+                    <li><a class="nav-link active" href="path.html">Learning Path</a></li>
+                    <li><a class="nav-link" href="exercise.html">Exercise</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="section">
+        <div class="container">
+            <section class="welcome-banner fade-up">
+                <div>
+                    <p class="eyebrow">Your dashboard</p>
+                    <h1 class="section-title">Welcome, <span id="welcomeName">Learner</span></h1>
+                    <p id="welcomeText">
+                        Keep building your Python confidence one step at a time.
+                    </p>
+                </div>
+
+                <a id="continueLearningBtn" class="btn btn-primary" href="exercise.html">Continue Learning</a>
+            </section>
+
+            <section class="dashboard-grid">
+                <article class="progress-card card">
+                    <h2>Your Progress</h2>
+
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-label">Current XP</span>
+                            <strong id="xpValue">0</strong>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Current Level</span>
+                            <strong id="levelValue">1</strong>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-label">Daily Streak</span>
+                            <strong id="streakValue">0</strong>
+                        </div>
+                    </div>
+
+                    <div class="progress-copy">
+                        <div class="progress-labels">
+                            <span>Overall completion</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="progress-bar" aria-label="Learning progress">
+                            <span id="progressBarFill" class="progress-fill"></span>
+                        </div>
+                        <p id="progressSummary" class="progress-summary">0 of 5 stages completed</p>
+                    </div>
+                </article>
+
+                <aside class="motivation-card card">
+                    <h2>Next mission</h2>
+                    <p id="missionText">Choose an unlocked stage and continue earning XP.</p>
+                    <div id="stageMessage" class="message info show" aria-live="polite">
+                        Select an unlocked stage to focus your next exercise.
+                    </div>
+                </aside>
+            </section>
+
+            <section class="path-section">
+                <div class="section-heading">
+                    <p class="eyebrow">Learning path</p>
+                    <h2 class="section-title">Your Python stages</h2>
+                </div>
+
+                <div id="stagesContainer" class="path-map"></div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <p>PyLearn | Group 21</p>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="login.html">Login</a>
+                <a href="path.html">Learning Path</a>
+                <a href="exercise.html">Exercise</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

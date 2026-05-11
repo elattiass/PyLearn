@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyLearn | Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/app.js" defer></script>
+    <script src="js/login.js" defer></script>
+</head>
+<body class="page-auth">
+    <header class="site-header">
+        <div class="container header-content">
+            <a class="brand" href="index.html">
+                <span class="brand-mark">P</span>
+                <span class="brand-text">PyLearn</span>
+            </a>
+
+            <nav class="site-nav" aria-label="Main navigation">
+                <ul class="nav-list">
+                    <li><a class="nav-link" href="index.html">Home</a></li>
+                    <li><a class="nav-link active" href="login.html">Login</a></li>
+                    <li><a class="nav-link" href="path.html">Learning Path</a></li>
+                    <li><a class="nav-link" href="exercise.html">Exercise</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="section">
+        <div class="container auth-layout">
+            <section class="auth-intro fade-up">
+                <p class="eyebrow">Welcome back</p>
+                <h1 class="section-title">Log in and continue your Python journey</h1>
+                <p>
+                    Sign in to save your mock progress, track XP, and continue along the learning path.
+                    This version uses localStorage to simulate the client-side experience.
+                </p>
+
+                <div class="auth-benefits card">
+                    <h2>What happens after login?</h2>
+                    <ul class="simple-list">
+                        <li>Your mock user profile is saved locally in the browser.</li>
+                        <li>Your learning progress is initialized if you are new to PyLearn.</li>
+                        <li>You are redirected to the gamified learning path page.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="auth-card card">
+                <h2>Login Form</h2>
+                <p class="card-subtitle">Enter your details to start learning.</p>
+
+                <form id="loginForm" class="auth-form" novalidate>
+                    <div class="form-group">
+                        <label for="email">Email address</label>
+                        <input id="email" name="email" type="email" placeholder="student@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" placeholder="At least 6 characters" required>
+                    </div>
+
+                    <button class="btn btn-primary full-width" type="submit">Log In</button>
+                </form>
+
+                <div id="loginMessage" class="message" aria-live="polite"></div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <p>PyLearn | Group 21</p>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="login.html">Login</a>
+                <a href="path.html">Learning Path</a>
+                <a href="exercise.html">Exercise</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
