@@ -3,34 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    const stages = [
-        {
-            id: 1,
-            title: "Python Basics",
-            description: "Start with Python syntax, printing text, and simple rules."
-        },
-        {
-            id: 2,
-            title: "Variables",
-            description: "Understand how Python stores values using variable names."
-        },
-        {
-            id: 3,
-            title: "Conditions",
-            description: "Explore how if statements help programs make decisions."
-        },
-        {
-            id: 4,
-            title: "Loops",
-            description: "Practice repeating actions using Python loops."
-        },
-        {
-            id: 5,
-            title: "Functions",
-            description: "Learn how reusable functions organize Python code."
-        }
-    ];
-
+    const stages = PyLearnApp.COURSE_STAGES;
     const welcomeName = document.getElementById("welcomeName");
     const welcomeText = document.getElementById("welcomeText");
     const xpValue = document.getElementById("xpValue");
@@ -52,69 +25,91 @@ document.addEventListener("DOMContentLoaded", function () {
         stageMessage.className = `message ${type} show`;
     }
 
-    function getStageStatus(index) {
-        const completedCount = progress.completedQuestions.length;
-
-        if (index < completedCount) {
-            return "completed";
-        }
-
-        if (index === completedCount && completedCount < stages.length) {
-            return "current";
-        }
-
-        return "locked";
-    }
-
     function updateDashboard() {
         progress = PyLearnApp.getProgress();
 
         const displayName = PyLearnApp.getDisplayName(user);
-        const completedCount = progress.completedQuestions.length;
+        const overallStats = PyLearnApp.getOverallStats(progress);
         const completionPercent = PyLearnApp.getCompletionPercent(progress);
-        const nextStageIndex = Math.min(completedCount, stages.length - 1);
-        const nextStage = stages[nextStageIndex];
+        const nextStageId = PyLearnApp.getFirstUnlockedPlayableStageId(progress);
+        const nextStage = PyLearnApp.getStageById(nextStageId);
 
         welcomeName.textContent = displayName;
-        welcomeText.textContent = user
-            ? `Welcome back, ${displayName}. Your current focus is ${nextStage.title}.`
-            : "You are exploring as a guest. Log in to personalize your progress and streak.";
-
-        xpValue.textContent = progress.xp;
+        welcomeText.textContent = `Welcome back, ${displayName}. Your current focus is ${nextStage.title}.`;
+        xpValue.textContent = progress.totalXP;
         levelValue.textContent = progress.level;
         streakValue.textContent = progress.streak;
         progressPercent.textContent = `${completionPercent}%`;
         progressBarFill.style.width = `${completionPercent}%`;
-        progressSummary.textContent = `${completedCount} of ${stages.length} stages completed`;
+        progressSummary.textContent = `${overallStats.answered} of ${overallStats.total} available questions answered`;
 
-        missionText.textContent = completedCount >= stages.length
-            ? "Amazing work. You completed every current stage, so now you can review and strengthen your skills."
-            : `Next up: ${nextStage.title}. Answer the exercise to unlock more of the learning path.`;
+        missionText.textContent = overallStats.answered >= overallStats.total
+            ? "Amazing work. You answered every available question, so now you can review any unlocked stage."
+            : `Next up: ${nextStage.title}. Complete every question in the stage to unlock the next playable topic.`;
+    }
+
+    function getStatusLabel(status, stats) {
+        if (!stats.hasQuestions) {
+            return "Coming Soon";
+        }
+
+        return status.charAt(0).toUpperCase() + status.slice(1);
     }
 
     function renderStages() {
         progress = PyLearnApp.getProgress();
 
-        stagesContainer.innerHTML = stages.map(function (stage, index) {
-            const status = getStageStatus(index);
-            const isSelected = progress.selectedStage === stage.id;
+        stagesContainer.innerHTML = stages.map(function (stage) {
+            const stats = PyLearnApp.getStageStats(stage.id, progress);
+            const status = PyLearnApp.getStageStatus(stage.id, progress);
+            const isSelected = progress.selectedStageId === stage.id;
             const isLocked = status === "locked";
-            const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+            const progressText = stats.hasQuestions
+                ? `${stats.answered} / ${stats.total} questions answered`
+                : "0 / 0 questions available";
+            const actionText = isLocked
+                ? "Locked"
+                : stats.completed ? "Review" : "Start";
 
             return `
                 <article class="stage-card ${status} ${isSelected ? "selected" : ""}" data-stage-id="${stage.id}" data-locked="${isLocked}">
-                    <div class="stage-number">${stage.id}</div>
-                    <h3>${stage.title}</h3>
-                    <p class="stage-description">${stage.description}</p>
+                    <div class="stage-number stage-icon" aria-hidden="true">${stage.icon}</div>
+                    <div class="stage-content">
+                        <p class="stage-kicker">Stage ${stage.number}</p>
+                        <h3>${stage.title}</h3>
+                        <p class="stage-description">${stage.description}</p>
+                        <div class="stage-progress-line">
+                            <span>${progressText}</span>
+                            <span>${stats.correct} correct</span>
+                        </div>
+                        <div class="stage-mini-progress" aria-label="${stage.title} progress">
+                            <span style="width: ${stats.total > 0 ? Math.round((stats.answered / stats.total) * 100) : 0}%"></span>
+                        </div>
+                    </div>
                     <div class="stage-footer">
-                        <span class="stage-status">${statusLabel}</span>
-                        ${isLocked
-                            ? '<span class="stage-link disabled">Locked</span>'
-                            : '<a class="stage-link" href="exercise.html">Open Exercise</a>'}
+                        <span class="stage-status">${getStatusLabel(status, stats)}</span>
+                        <span class="stage-link ${isLocked ? "disabled" : ""}">${actionText}</span>
                     </div>
                 </article>
             `;
         }).join("");
+    }
+
+    function openStage(stageId) {
+        const stats = PyLearnApp.getStageStats(stageId);
+        const status = PyLearnApp.getStageStatus(stageId);
+
+        if (status === "locked") {
+            const message = stats.hasQuestions
+                ? "That stage is locked. Finish the current unlocked stage first."
+                : "That stage is prepared for future questions and is not available yet.";
+            showStageMessage(message, "error");
+            return;
+        }
+
+        PyLearnApp.setSelectedStage(stageId);
+        PyLearnApp.setCurrentQuestionIndex(stageId, 0);
+        window.location.href = "exercise.html";
     }
 
     stagesContainer.addEventListener("click", function (event) {
@@ -124,30 +119,12 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const stageId = Number(card.dataset.stageId);
-        const isLocked = card.dataset.locked === "true";
-
-        if (isLocked) {
-            showStageMessage("That stage is still locked. Complete the earlier topic first.", "error");
-            return;
-        }
-
-        PyLearnApp.setSelectedStage(stageId);
-        PyLearnApp.setCurrentQuestionIndex(stageId - 1);
-        progress = PyLearnApp.getProgress();
-        renderStages();
-
-        showStageMessage(
-            `${stages[stageId - 1].title} is selected. Open the exercise page to continue learning.`,
-            "success"
-        );
+        openStage(card.dataset.stageId);
     });
 
-    continueLearningBtn.addEventListener("click", function () {
-        progress = PyLearnApp.getProgress();
-        const nextStage = Math.min(progress.completedQuestions.length + 1, stages.length);
-        PyLearnApp.setSelectedStage(nextStage);
-        PyLearnApp.setCurrentQuestionIndex(nextStage - 1);
+    continueLearningBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        openStage(PyLearnApp.getFirstUnlockedPlayableStageId(PyLearnApp.getProgress()));
     });
 
     updateDashboard();

@@ -25,7 +25,7 @@ The multiple-choice structure simplifies answer checking, data handling, and fut
 
 Current simulation behavior:
 There is no real backend in this stage.
-Answer validation, XP calculation, daily streak updates, level progress, and learning progress are currently simulated on the client side using JavaScript and localStorage.
+Answer validation, XP calculation, daily streak updates, level progress, stage unlocking, and answered question states are simulated on the client side using JavaScript and localStorage.
 Authentication is also simulated using localStorage with a mock login flag.
 Real authentication and real access control will be implemented on the server side in a future project stage.
 
@@ -37,10 +37,10 @@ Project pages:
    Login page with a validated form for email and password.
 
 3. path.html
-   Learning path page that displays XP, level, streak, progress bar, and learning stages.
+   Learning path page that displays XP, level, streak, progress bar, and gamified learning stages.
 
 4. exercise.html
-   Exercise page with multiple-choice Python questions, instant feedback, and XP updates.
+   Exercise page with multiple-choice Python questions, instant feedback, stage navigation, and XP updates.
 
 Main functionality:
 - Shared navigation across all pages
@@ -49,10 +49,23 @@ Main functionality:
 - Mock login saved in localStorage
 - Guest access restriction for the learning path and exercise pages
 - Logout link that clears the mock login data
-- Progress tracking with XP, level, streak, and completed questions
-- Gamified learning path with visual stage states
+- Progress tracking with XP, level, streak, selected stage, and answered question states
+- Gamified learning path with visual stage states: Locked, Current, Completed
 - Multiple-choice exercise experience with immediate feedback
-- Next question flow and protection against repeated XP gain for the same question
+- Question navigation using Previous, Next, and clickable question tracker buttons
+- Saved answers shown when users revisit answered questions
+- First-submission-only scoring, so changing an answer later does not award XP
+
+Question and scoring behavior:
+- Questions are organized by learning stages when the current question bank supports it.
+- The current project uses 30 built-in multiple-choice questions from python_quiz_questions.json.
+- Stage completion counts answered questions, not only correct answers.
+- The next playable stage unlocks only after all available questions in the current playable stage are answered.
+- Easy questions award 5 XP.
+- Medium questions award 10 XP.
+- Hard questions award 15 XP.
+- XP is awarded only if the first submitted answer is correct.
+- Already answered questions cannot award XP again after refresh or navigation.
 
 Validation features:
 - Login email cannot be empty
@@ -65,29 +78,31 @@ Animations and design:
 - Hover effects on buttons and cards
 - Animated feedback and section entrance effects
 - Floating dashboard hero animation
-- Rounded cards, progress bars, and colorful gamified stage styling
+- Rounded cards, progress bars, badges, and colorful gamified stage styling
+- Responsive layout for mobile and desktop
 
 Folder structure:
 PyLearn_Group21/
-│
-├── index.html
-├── login.html
-├── path.html
-├── exercise.html
-│
-├── css/
-│   └── style.css
-│
-├── js/
-│   ├── app.js
-│   ├── login.js
-│   ├── path.js
-│   └── exercise.js
-│
-├── images/
-│   └── README_images.txt
-│
-└── README.txt
+|
+|-- index.html
+|-- login.html
+|-- path.html
+|-- exercise.html
+|-- python_quiz_questions.json
+|
+|-- css/
+|   |-- style.css
+|
+|-- js/
+|   |-- app.js
+|   |-- login.js
+|   |-- path.js
+|   |-- exercise.js
+|
+|-- images/
+|   |-- README_images.txt
+|
+|-- README.txt
 
 How to run:
 Open index.html in a browser.

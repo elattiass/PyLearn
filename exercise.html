@@ -34,6 +34,7 @@
                 <div class="exercise-header fade-up">
                     <p class="eyebrow">Multiple-choice Python practice</p>
                     <h1 class="section-title">Python Practice Arena</h1>
+                    <p class="stage-line">Current stage: <strong id="stageName">Python Basics</strong></p>
                     <p id="questionIntro">
                         Answer short Python questions, get instant feedback, and grow your XP.
                     </p>
@@ -43,6 +44,8 @@
                     <div class="quiz-top">
                         <span id="questionCounter" class="question-counter">Question 1 of 5</span>
                         <span id="questionTopic" class="topic-pill">Python Basics</span>
+                        <span id="difficultyBadge" class="difficulty-badge easy">Easy</span>
+                        <span id="xpRewardBadge" class="xp-reward-badge">+5 XP</span>
                     </div>
 
                     <h2 id="questionText">Loading question...</h2>
@@ -57,7 +60,8 @@
                         </p>
 
                         <div class="quiz-actions">
-                            <button class="btn btn-primary" type="submit">Submit Answer</button>
+                            <button id="submitAnswerBtn" class="btn btn-primary" type="submit">Submit Answer</button>
+                            <button id="previousQuestionBtn" class="btn btn-secondary" type="button">Previous Question</button>
                             <button id="nextQuestionBtn" class="btn btn-secondary" type="button">Next Question</button>
                             <a class="text-link" href="path.html">Back to Learning Path</a>
                         </div>
@@ -88,8 +92,18 @@
                         <strong id="streakSidebar">0</strong>
                     </div>
                     <div class="sidebar-stat">
-                        <span>Questions completed</span>
+                        <span>Stage progress</span>
                         <strong id="completionSidebar">0/5</strong>
+                    </div>
+                </article>
+
+                <article class="card tracker-panel">
+                    <h2>Question tracker</h2>
+                    <div id="questionTracker" class="question-tracker" aria-label="Question navigation"></div>
+                    <div class="tracker-legend">
+                        <span><span class="legend-dot unanswered-dot"></span>Unanswered</span>
+                        <span><span class="legend-dot correct-dot"></span>Correct</span>
+                        <span><span class="legend-dot incorrect-dot"></span>Incorrect</span>
                     </div>
                 </article>
 
