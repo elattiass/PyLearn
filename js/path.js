@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+    if (!PyLearnApp.requireLogin()) {
+        return;
+    }
+
     const stages = [
         {
             id: 1,

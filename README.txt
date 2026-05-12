@@ -26,6 +26,8 @@ The multiple-choice structure simplifies answer checking, data handling, and fut
 Current simulation behavior:
 There is no real backend in this stage.
 Answer validation, XP calculation, daily streak updates, level progress, and learning progress are currently simulated on the client side using JavaScript and localStorage.
+Authentication is also simulated using localStorage with a mock login flag.
+Real authentication and real access control will be implemented on the server side in a future project stage.
 
 Project pages:
 1. index.html
@@ -45,6 +47,8 @@ Main functionality:
 - Responsive design for desktop and mobile
 - Login form validation
 - Mock login saved in localStorage
+- Guest access restriction for the learning path and exercise pages
+- Logout link that clears the mock login data
 - Progress tracking with XP, level, streak, and completed questions
 - Gamified learning path with visual stage states
 - Multiple-choice exercise experience with immediate feedback

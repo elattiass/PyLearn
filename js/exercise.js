@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+    if (!PyLearnApp.requireLogin()) {
+        return;
+    }
+
     const questions = [
         {
             id: "q1",

@@ -1,7 +1,8 @@
 (function () {
     const STORAGE_KEYS = {
         user: "pylearn_user",
-        progress: "pylearn_progress"
+        progress: "pylearn_progress",
+        isLoggedIn: "isLoggedIn"
     };
 
     const TOTAL_QUESTIONS = 5;
@@ -38,6 +39,10 @@
 
     function writeStorage(key, value) {
         localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function isLoggedIn() {
+        return localStorage.getItem(STORAGE_KEYS.isLoggedIn) === "true";
     }
 
     function calculateLevel(xp) {
@@ -94,7 +99,35 @@
 
     function setUser(user) {
         writeStorage(STORAGE_KEYS.user, user);
+        localStorage.setItem(STORAGE_KEYS.isLoggedIn, "true");
         return user;
+    }
+
+    function logout() {
+        localStorage.removeItem(STORAGE_KEYS.user);
+        localStorage.removeItem(STORAGE_KEYS.isLoggedIn);
+        window.location.href = "login.html";
+    }
+
+    function requireLogin() {
+        if (isLoggedIn()) {
+            return true;
+        }
+
+        alert("Please log in before starting the course.");
+        window.location.href = "login.html";
+        return false;
+    }
+
+    function setupLogoutLinks() {
+        const logoutLinks = document.querySelectorAll("[data-logout]");
+
+        logoutLinks.forEach(function (link) {
+            link.addEventListener("click", function (event) {
+                event.preventDefault();
+                logout();
+            });
+        });
     }
 
     function getDisplayName(user) {
@@ -188,6 +221,10 @@
         getLocalDateString,
         getUser,
         setUser,
+        isLoggedIn,
+        logout,
+        requireLogin,
+        setupLogoutLinks,
         getDisplayName,
         getProgress,
         saveProgress,
@@ -199,4 +236,6 @@
         setCurrentQuestionIndex,
         setSelectedStage
     };
+
+    document.addEventListener("DOMContentLoaded", setupLogoutLinks);
 })();
