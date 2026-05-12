@@ -25,8 +25,8 @@ The multiple-choice structure simplifies answer checking, data handling, and fut
 
 Current simulation behavior:
 There is no real backend in this stage.
-Answer validation, XP calculation, daily streak updates, level progress, stage unlocking, and answered question states are simulated on the client side using JavaScript and localStorage.
-Authentication is also simulated using localStorage with a mock login flag.
+Answer validation, XP calculation, daily streak updates, level progress, stage unlocking, answered question states, and per-user progress are simulated on the client side using JavaScript and localStorage.
+Authentication is also simulated using localStorage with a mock login flag, and logged-in users are redirected away from the login page.
 Real authentication and real access control will be implemented on the server side in a future project stage.
 
 Project pages:
@@ -44,9 +44,10 @@ Project pages:
 
 Main functionality:
 - Shared navigation across all pages
+- Dynamic navigation that changes links based on login state
 - Responsive design for desktop and mobile
 - Login form validation
-- Mock login saved in localStorage
+- Mock login saved in localStorage with separate progress per email address
 - Guest access restriction for the learning path and exercise pages
 - Logout link that clears the mock login data
 - Progress tracking with XP, level, streak, selected stage, and answered question states
@@ -55,6 +56,7 @@ Main functionality:
 - Question navigation using Previous, Next, and clickable question tracker buttons
 - Saved answers shown when users revisit answered questions
 - First-submission-only scoring, so changing an answer later does not award XP
+- Restart Stage practice button that clears visible stage answers without duplicating already earned XP
 
 Question and scoring behavior:
 - Questions are organized by learning stages when the current question bank supports it.
@@ -66,6 +68,8 @@ Question and scoring behavior:
 - Hard questions award 15 XP.
 - XP is awarded only if the first submitted answer is correct.
 - Already answered questions cannot award XP again after refresh or navigation.
+- Restarting a stage clears the current visible attempt for practice, but previously earned question XP remains protected.
+- Incorrect answers highlight the selected wrong option in red and the correct option in green.
 
 Validation features:
 - Login email cannot be empty

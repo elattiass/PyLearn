@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+    if (PyLearnApp.redirectIfLoggedIn()) {
+        return;
+    }
+
     const loginForm = document.getElementById("loginForm");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
@@ -10,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function isValidEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email);
     }
 
     loginForm.addEventListener("submit", function (event) {
@@ -22,6 +26,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!email) {
             errors.push("Email is required.");
+        } else if (!/^[\x00-\x7F]+$/.test(email)) {
+            errors.push("Email must use English letters, numbers, and standard symbols only.");
         } else if (!isValidEmail(email)) {
             errors.push("Please enter a valid email address.");
         }

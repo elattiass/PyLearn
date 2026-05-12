@@ -158,6 +158,10 @@ input {
     transform: translateY(-1px);
 }
 
+.is-hidden {
+    display: none !important;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -191,6 +195,11 @@ input {
 .btn-secondary {
     color: var(--color-text);
     background: rgba(28, 176, 246, 0.12);
+}
+
+.btn-warning {
+    color: var(--color-text);
+    background: rgba(255, 176, 32, 0.2);
 }
 
 .full-width {
@@ -847,9 +856,19 @@ input {
     background: rgba(88, 204, 2, 0.12);
 }
 
+.option-label.correct .option-marker {
+    background: var(--color-primary);
+    color: #ffffff;
+}
+
 .option-label.incorrect {
     border-color: rgba(239, 83, 80, 0.45);
     background: rgba(239, 83, 80, 0.1);
+}
+
+.option-label.incorrect .option-marker {
+    background: var(--color-danger);
+    color: #ffffff;
 }
 
 .option-label.disabled-answer {

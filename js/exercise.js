@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const submitAnswerBtn = document.getElementById("submitAnswerBtn");
     const previousQuestionBtn = document.getElementById("previousQuestionBtn");
     const nextQuestionBtn = document.getElementById("nextQuestionBtn");
+    const restartStageBtn = document.getElementById("restartStageBtn");
     const feedbackBox = document.getElementById("feedbackBox");
     const feedbackTitle = document.getElementById("feedbackTitle");
     const feedbackText = document.getElementById("feedbackText");
@@ -78,10 +79,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function renderSavedFeedback(question, answerState) {
         if (answerState.status === "correct") {
+            const savedXpMessage = answerState.xpAwarded
+                ? "You earned XP on the first submission for this question."
+                : "This is correct practice, but the XP for this question was already earned before.";
+
             showFeedback(
                 "Correct answer saved.",
                 "success",
-                `${question.explanation} You earned XP on the first submission for this question.`
+                `${question.explanation} ${savedXpMessage}`
             );
             return;
         }
@@ -111,9 +116,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const disabled = answered ? "disabled" : "";
             const selectedClass = answered && answerState.selectedIndex === index ? "selected-answer" : "";
             const disabledClass = answered ? "disabled-answer" : "";
-            const correctnessClass = answered && answerState.selectedIndex === index
-                ? answerState.status
-                : "";
+            let correctnessClass = "";
+
+            if (answered && index === question.correctAnswer) {
+                correctnessClass = "correct";
+            } else if (answered && answerState.selectedIndex === index) {
+                correctnessClass = "incorrect";
+            }
 
             return `
                 <label class="option-label ${selectedClass} ${correctnessClass} ${disabledClass}">
@@ -224,6 +233,18 @@ document.addEventListener("DOMContentLoaded", function () {
         loadQuestion();
     }
 
+    function restartCurrentStage() {
+        progress = PyLearnApp.restartStage(selectedStageId);
+        currentQuestionIndex = 0;
+        PyLearnApp.setCurrentQuestionIndex(selectedStageId, currentQuestionIndex);
+        loadQuestion();
+        showFeedback(
+            "Stage restarted for practice.",
+            "info",
+            "Your visible answers for this stage were cleared, but already earned XP cannot be earned again."
+        );
+    }
+
     quizForm.addEventListener("submit", handleSubmit);
 
     previousQuestionBtn.addEventListener("click", function () {
@@ -233,6 +254,8 @@ document.addEventListener("DOMContentLoaded", function () {
     nextQuestionBtn.addEventListener("click", function () {
         goToQuestion(currentQuestionIndex + 1);
     });
+
+    restartStageBtn.addEventListener("click", restartCurrentStage);
 
     questionTracker.addEventListener("click", function (event) {
         const trackerButton = event.target.closest(".tracker-button");

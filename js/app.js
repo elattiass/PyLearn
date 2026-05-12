@@ -403,6 +403,24 @@
         return localStorage.getItem(STORAGE_KEYS.isLoggedIn) === "true";
     }
 
+    function getUserEmailKey(user = getUser()) {
+        if (!user || !user.email) {
+            return "";
+        }
+
+        return encodeURIComponent(user.email.trim().toLowerCase());
+    }
+
+    function getProgressStorageKey() {
+        const emailKey = getUserEmailKey();
+        return emailKey ? `${STORAGE_KEYS.progress}_${emailKey}` : STORAGE_KEYS.progress;
+    }
+
+    function getSelectedStageStorageKey() {
+        const emailKey = getUserEmailKey();
+        return emailKey ? `${STORAGE_KEYS.selectedStage}_${emailKey}` : STORAGE_KEYS.selectedStage;
+    }
+
     function calculateLevel(xp) {
         const safeXp = Math.max(0, Number(xp) || 0);
         return Math.floor(safeXp / 20) + 1;
@@ -446,6 +464,7 @@
             lastActiveDate: "",
             selectedStageId: "basics",
             selectedStage: 1,
+            earnedQuestionIds: [],
             currentQuestionByStage: {},
             stages: createStageProgress()
         };
@@ -508,13 +527,16 @@
             const stageProgress = progress.stages[question.stageId];
 
             if (!stageProgress.answeredQuestions[question.id]) {
-                stageProgress.answeredQuestions[question.id] = {
+            stageProgress.answeredQuestions[question.id] = {
                     status: "correct",
                     selectedIndex: question.correctAnswer,
                     firstAttemptCorrect: true,
                     xpAwarded: true,
                     answeredAt: new Date().toISOString()
                 };
+                if (!progress.earnedQuestionIds.includes(question.id)) {
+                    progress.earnedQuestionIds.push(question.id);
+                }
             }
         });
     }
@@ -564,7 +586,8 @@
     function sanitizeProgress(progress) {
         const source = progress || {};
         const safeProgress = createDefaultProgress();
-        const savedSelectedStage = localStorage.getItem(STORAGE_KEYS.selectedStage);
+        const savedSelectedStage = localStorage.getItem(getSelectedStageStorageKey())
+            || localStorage.getItem(STORAGE_KEYS.selectedStage);
         const incomingXP = Number.isFinite(Number(source.totalXP))
             ? Number(source.totalXP)
             : Number(source.xp);
@@ -576,6 +599,12 @@
         safeProgress.lastActiveDate = typeof source.lastActiveDate === "string"
             ? source.lastActiveDate
             : "";
+        safeProgress.earnedQuestionIds = Array.isArray(source.earnedQuestionIds)
+            ? [...new Set(source.earnedQuestionIds.map(String))]
+                .filter(function (questionId) {
+                    return Boolean(getQuestionById(questionId));
+                })
+            : [];
 
         COURSE_STAGES.forEach(function (stage) {
             const sourceStage = source.stages && source.stages[stage.id] ? source.stages[stage.id] : {};
@@ -586,6 +615,9 @@
 
                 if (cleanAnswerState) {
                     safeProgress.stages[stage.id].answeredQuestions[question.id] = cleanAnswerState;
+                    if (cleanAnswerState.xpAwarded && !safeProgress.earnedQuestionIds.includes(question.id)) {
+                        safeProgress.earnedQuestionIds.push(question.id);
+                    }
                 }
             });
         });
@@ -625,13 +657,19 @@
     }
 
     function getProgress() {
-        return sanitizeProgress(readStorage(STORAGE_KEYS.progress, createDefaultProgress()));
+        const progressKey = getProgressStorageKey();
+        const storedProgress = readStorage(progressKey, null);
+        const fallbackProgress = progressKey !== STORAGE_KEYS.progress
+            ? readStorage(STORAGE_KEYS.progress, null)
+            : null;
+
+        return sanitizeProgress(storedProgress || fallbackProgress || createDefaultProgress());
     }
 
     function saveProgress(progress) {
         const safeProgress = sanitizeProgress(progress);
-        writeStorage(STORAGE_KEYS.progress, safeProgress);
-        localStorage.setItem(STORAGE_KEYS.selectedStage, safeProgress.selectedStageId);
+        writeStorage(getProgressStorageKey(), safeProgress);
+        localStorage.setItem(getSelectedStageStorageKey(), safeProgress.selectedStageId);
         return safeProgress;
     }
 
@@ -655,6 +693,15 @@
         window.location.href = "login.html";
     }
 
+    function redirectIfLoggedIn() {
+        if (isLoggedIn()) {
+            window.location.href = "path.html";
+            return true;
+        }
+
+        return false;
+    }
+
     function requireLogin() {
         if (isLoggedIn()) {
             return true;
@@ -673,6 +720,28 @@
                 event.preventDefault();
                 logout();
             });
+        });
+    }
+
+    function setupDynamicNavigation() {
+        const loggedIn = isLoggedIn();
+        const loginLinks = document.querySelectorAll('a[href="login.html"]:not([data-logout])');
+        const courseLinks = document.querySelectorAll('a[href="path.html"], a[href="exercise.html"], [data-logout]');
+
+        function setLinkVisibility(link, visible) {
+            const listItem = link.closest("li");
+            const target = listItem || link;
+
+            target.classList.toggle("is-hidden", !visible);
+            link.setAttribute("aria-hidden", visible ? "false" : "true");
+        }
+
+        loginLinks.forEach(function (link) {
+            setLinkVisibility(link, !loggedIn);
+        });
+
+        courseLinks.forEach(function (link) {
+            setLinkVisibility(link, loggedIn);
         });
     }
 
@@ -823,20 +892,22 @@
         }
 
         const correct = Number(selectedIndex) === question.correctAnswer;
+        const alreadyEarnedXp = safeProgress.earnedQuestionIds.includes(question.id);
         const answerState = {
             status: correct ? "correct" : "incorrect",
             selectedIndex: Number(selectedIndex),
             firstAttemptCorrect: correct,
-            xpAwarded: correct,
+            xpAwarded: correct && !alreadyEarnedXp,
             answeredAt: new Date().toISOString()
         };
 
         stageProgress.answeredQuestions[question.id] = answerState;
 
-        if (correct) {
+        if (correct && !alreadyEarnedXp) {
             safeProgress.totalXP += question.xpReward;
             safeProgress.xp = safeProgress.totalXP;
             safeProgress.level = calculateLevel(safeProgress.totalXP);
+            safeProgress.earnedQuestionIds.push(question.id);
         }
 
         safeProgress = saveProgress(safeProgress);
@@ -844,11 +915,27 @@
         return {
             accepted: true,
             alreadyAnswered: false,
-            awarded: correct,
-            xpAwarded: correct ? question.xpReward : 0,
+            awarded: correct && !alreadyEarnedXp,
+            xpAwarded: correct && !alreadyEarnedXp ? question.xpReward : 0,
             progress: safeProgress,
             answerState: answerState
         };
+    }
+
+    function restartStage(stageValue) {
+        const safeProgress = getProgress();
+        const stageId = normalizeStageId(stageValue || safeProgress.selectedStageId);
+
+        if (!safeProgress.stages[stageId]) {
+            return saveProgress(safeProgress);
+        }
+
+        safeProgress.stages[stageId].answeredQuestions = {};
+        safeProgress.currentQuestionByStage[stageId] = 0;
+        safeProgress.selectedStageId = stageId;
+        safeProgress.selectedStage = getStageById(stageId).number;
+
+        return saveProgress(safeProgress);
     }
 
     function setCurrentQuestionIndex(stageId, index) {
@@ -899,7 +986,9 @@
         isLoggedIn,
         logout,
         requireLogin,
+        redirectIfLoggedIn,
         setupLogoutLinks,
+        setupDynamicNavigation,
         getDisplayName,
         getProgress,
         saveProgress,
@@ -916,10 +1005,12 @@
         getFirstUnlockedPlayableStageId,
         registerDailyActivity,
         submitQuestionAnswer,
+        restartStage,
         setCurrentQuestionIndex,
         getCurrentQuestionIndex,
         setSelectedStage
     };
 
     document.addEventListener("DOMContentLoaded", setupLogoutLinks);
+    document.addEventListener("DOMContentLoaded", setupDynamicNavigation);
 })();
